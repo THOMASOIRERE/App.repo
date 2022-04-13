@@ -1,0 +1,87 @@
+from flask import Flask
+
+from models import StudentgradesModel
+
+app = Flask(__name__)
+
+app.run(host='localhost',port=5000)
+
+
+from flask import Flask
+ 
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///<db_Thomas>.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+ 
+app.run(host='localhost', port=5000)
+
+from flask import Flask
+ 
+app =Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///<db_name>.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
+ 
+@app.before_first_request
+def create_table():
+    db.create_all()
+ 
+app.run(host='localhost', port=5000)
+
+@app.route('/data/create' , methods = ['GET','POST'])
+def create():
+    if request.method == 'GET':
+        return render_template('inputpage.html')
+ 
+    if request.method == 'POST':
+        Grades = request.form['Grades']
+        Fullnames = request.form['Fullnames']
+        MathScore = request.form['MathScore']
+        EnglishScore = request.form['EnglishScore']
+        KiswahiliScore = request.form['KiswahiliScore']
+        ScienceScore = request.form['ScienceScore']
+        CREScore = request.form['CREScore']
+       # position = request.form['position']
+        student = StudentgradesModel(Grades=Grades, Fullname=Fullname, MathScore=MathScore, EnglishScore=EnglishScore, KiswahiliScore=KiswahiliScore, ScienceScore=ScienceScore, CREScore=CREScore)
+        db.session.add(student)
+        db.session.commit()
+        return redirect('/data')
+    
+   @app.route('/data/<int:id>/delete', methods=['GET','POST'])
+def delete(id):
+    Scores = StudentgradesModel.query.filter_by(employee_id=id).first()
+    if request.method == 'POST':
+        if Scores:
+            db.session.delete(Scores)
+            db.session.commit()
+            return redirect('/data')
+        abort(404)
+ 
+    return render_template('delete.html') 
+
+
+  @app.route('/data/<int:id>/edit', methods=['GET','POST'])
+def edit(id):
+    Scores = StudentgradesModel.query.filter_by(employee_id=id).first()
+    if request.method == 'POST':
+        if Scores:
+            db.session.edit(Scores)
+            db.session.commit()
+            return redirect('/data')
+        abort(404)
+ 
+    return render_template('edit.html') 
+
+@app.route('/data')
+def output():
+    Scores = StudentgradesModel.query.all()
+    return render_template('output.html',Scores = Scores)
+
+
+@app.route('/data/<int:id>')
+def OutputSingleScore(id):
+    Scores = StudentgradesModel.query.filter_by(employee_id=id).first()
+    if Scores:
+        return render_template('data.html', Scores = Grade)
+    return f"Score with Grade ={Grade} Doenst exist"
+
